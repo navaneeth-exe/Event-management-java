@@ -25,6 +25,8 @@ public class EventCreationUI extends JFrame implements ActionListener {
     private JComboBox<HallItem> hallCombo;
     private JButton submitButton, cancelButton, checkAvailabilityButton;
     private JLabel hallStatusLabel;
+    private JSpinner maxParticipantsSpinner;
+    private JCheckBox unlimitedCheckBox;
     
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private Date selectedDate;
@@ -35,7 +37,7 @@ public class EventCreationUI extends JFrame implements ActionListener {
         
         setTitle("Create New Event");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(600, 650);
+        setSize(600, 720);
         setLocationRelativeTo(null);
         
         initializeUI();
@@ -159,6 +161,36 @@ public class EventCreationUI extends JFrame implements ActionListener {
         hallStatusLabel = new JLabel(" ");
         hallStatusLabel.setFont(new Font("Arial", Font.ITALIC, 11));
         formPanel.add(hallStatusLabel, gbc);
+        
+        row++;
+        
+        // Max Participants
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.3;
+        formPanel.add(new JLabel("Max Participants:"), gbc);
+        
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        SpinnerNumberModel participantsModel = new SpinnerNumberModel(50, 10, 1000, 10);
+        maxParticipantsSpinner = new JSpinner(participantsModel);
+        formPanel.add(maxParticipantsSpinner, gbc);
+        
+        row++;
+        
+        // Unlimited Checkbox
+        gbc.gridx = 1;
+        gbc.gridy = row;
+        unlimitedCheckBox = new JCheckBox("Unlimited Participants");
+        unlimitedCheckBox.addItemListener(e -> {
+            if (unlimitedCheckBox.isSelected()) {
+                maxParticipantsSpinner.setEnabled(false);
+            } else {
+                maxParticipantsSpinner.setEnabled(true);
+            }
+        });
+        formPanel.add(unlimitedCheckBox, gbc);
         
         row++;
         
@@ -290,6 +322,18 @@ public class EventCreationUI extends JFrame implements ActionListener {
             return;
         }
         
+        // Validation: Check if maxParticipants exceeds hall capacity
+        if (!unlimitedCheckBox.isSelected()) {
+            int maxParticipants = (Integer) maxParticipantsSpinner.getValue();
+            int hallCapacity = selectedHall.getCapacity();
+            
+            if (maxParticipants > hallCapacity) {
+                showError("Maximum participants (" + maxParticipants + ") cannot exceed hall capacity (" + hallCapacity + ")");
+                maxParticipantsSpinner.requestFocus();
+                return;
+            }
+        }
+        
         // Double-check hall availability
         if (!HallDAO.isHallAvailable(selectedHall.getHallId(), eventDate)) {
             showError("This hall is already booked for the selected date.\nPlease select another hall or date.");
@@ -307,6 +351,13 @@ public class EventCreationUI extends JFrame implements ActionListener {
         newEvent.setManagerId(eventManagerId);
         newEvent.setApprovalStatus("pending");
         newEvent.setEventStatus("pending");
+        
+        // Set max participants
+        if (unlimitedCheckBox.isSelected()) {
+            newEvent.setMaxParticipants(null); // Unlimited
+        } else {
+            newEvent.setMaxParticipants((Integer) maxParticipantsSpinner.getValue());
+        }
         
         try {
             // Create event using EventDAO

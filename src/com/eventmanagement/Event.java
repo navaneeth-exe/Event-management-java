@@ -14,7 +14,8 @@ public class Event {
     private String hallName; // Hall name for display (not stored in DB)
     private String approvalStatus; // pending, approved, rejected
     private Integer approvedBy; // userId of admin who approved/rejected
-    private Date approvalDate; // Timestamp of approval/rejection 
+    private Date approvalDate; // Timestamp of approval/rejection
+    private Integer maxParticipants; // Maximum participants allowed (NULL = unlimited) 
 
     // Constructors
     public Event() {
@@ -129,6 +130,14 @@ public class Event {
         this.approvalDate = approvalDate;
     }
 
+    public Integer getMaxParticipants() {
+        return maxParticipants;
+    }
+
+    public void setMaxParticipants(Integer maxParticipants) {
+        this.maxParticipants = maxParticipants;
+    }
+
     // Other methods (if needed)
     @Override
     public String toString() {
@@ -145,6 +154,7 @@ public class Event {
                ", approvalStatus='" + approvalStatus + '\'' +
                ", approvedBy=" + approvedBy +
                ", approvalDate=" + approvalDate +
+               ", maxParticipants=" + maxParticipants +
                '}';
     }
 }

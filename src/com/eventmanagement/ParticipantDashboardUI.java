@@ -150,6 +150,7 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
         eventTableModel.addColumn("Hall");
         eventTableModel.addColumn("Type");
         eventTableModel.addColumn("Registered");
+        eventTableModel.addColumn("Capacity");
         eventTableModel.addColumn("Action");
 
         List<Event> approvedEvents = EventDAO.getAllApprovedEvents();
@@ -159,7 +160,27 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
             boolean isRegistered = EventRegistrationDAO.isParticipantRegistered(
                 event.getEventId(), participant.getParticipantId());
             
-            String actionText = isRegistered ? "Registered ✓" : "Register";
+            // Get remaining slots for capacity display
+            int remainingSlots = EventRegistrationDAO.getRemainingSlots(event.getEventId());
+            String capacityText;
+            
+            if (remainingSlots == -1) {
+                capacityText = "Unlimited";
+            } else if (remainingSlots == 0) {
+                capacityText = "0/" + event.getMaxParticipants() + " (FULL)";
+            } else {
+                capacityText = registrationCount + "/" + event.getMaxParticipants();
+            }
+            
+            // Determine action text
+            String actionText;
+            if (isRegistered) {
+                actionText = "Registered ✓";
+            } else if (remainingSlots == 0) {
+                actionText = "FULL";
+            } else {
+                actionText = "Register";
+            }
             
             eventTableModel.addRow(new Object[]{
                 event.getEventId(),
@@ -168,12 +189,13 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
                 event.getHallName() != null ? event.getHallName() : "N/A",
                 event.getEventType() != null ? event.getEventType() : "N/A",
                 registrationCount,
+                capacityText,
                 actionText
             });
         }
         
         // Set custom renderer for action column
-        eventTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
+        eventTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
         
         // Hide Event ID column
         eventTable.getColumnModel().getColumn(0).setMinWidth(0);
@@ -229,10 +251,15 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
         if (showingAvailableEvents) {
             // Handle Register button click
             int eventId = (int) eventTable.getValueAt(row, 0);
-            String actionText = (String) eventTable.getValueAt(row, 6);
+            String actionText = (String) eventTable.getValueAt(row, 7);
             
             if (actionText.equals("Register")) {
                 registerForEvent(eventId, row);
+            } else if (actionText.equals("FULL")) {
+                JOptionPane.showMessageDialog(this,
+                    "This event is full. No more registrations allowed.",
+                    "Event Full",
+                    JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
                     "You are already registered for this event.",
@@ -425,6 +452,10 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
             setText(text);
             
             if (text.contains("✓") || text.equals("Cancelled")) {
+                setBackground(Color.LIGHT_GRAY);
+                setForeground(Color.DARK_GRAY);
+                setEnabled(false);
+            } else if (text.equals("FULL")) {
                 setBackground(Color.LIGHT_GRAY);
                 setForeground(Color.DARK_GRAY);
                 setEnabled(false);
