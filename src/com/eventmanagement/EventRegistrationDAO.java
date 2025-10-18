@@ -16,7 +16,7 @@ public class EventRegistrationDAO {
      * @param eventId The ID of the event
      * @param participantId The ID of the participant
      * @return The generated registrationId, or -1 if failed
-     * @throws IllegalStateException if participant is already registered
+     * @throws IllegalStateException if participant is already registered or event is full
      */
     public static int registerForEvent(int eventId, int participantId) throws IllegalStateException {
         // First check if participant is already registered
@@ -24,8 +24,43 @@ public class EventRegistrationDAO {
             throw new IllegalStateException("Participant is already registered for this event.");
         }
 
-        int generatedId = -1;
+        // Check if event is full
         Connection conn = DatabaseConnection.getConnection();
+        try {
+            // Get event's maxParticipants
+            String checkQuery = "SELECT maxParticipants FROM Event WHERE eventId = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
+            checkStmt.setInt(1, eventId);
+            ResultSet rs = checkStmt.executeQuery();
+            
+            if (rs.next()) {
+                Integer maxParticipants = (Integer) rs.getObject("maxParticipants");
+                
+                // Only check capacity if maxParticipants is not NULL (unlimited)
+                if (maxParticipants != null) {
+                    // Count current registrations with status='registered'
+                    String countQuery = "SELECT COUNT(*) as count FROM EventRegistration " +
+                                       "WHERE eventId = ? AND status = 'registered'";
+                    PreparedStatement countStmt = conn.prepareStatement(countQuery);
+                    countStmt.setInt(1, eventId);
+                    ResultSet countRs = countStmt.executeQuery();
+                    
+                    if (countRs.next()) {
+                        int currentCount = countRs.getInt("count");
+                        if (currentCount >= maxParticipants) {
+                            DatabaseConnection.closeConnection(conn);
+                            throw new IllegalStateException("Event is full. Maximum participants reached.");
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            DatabaseConnection.closeConnection(conn);
+            e.printStackTrace();
+            return -1;
+        }
+
+        int generatedId = -1;
 
         try {
             String query = "INSERT INTO EventRegistration (eventId, participantId, registrationDate, status) " +
@@ -299,5 +334,54 @@ public class EventRegistrationDAO {
         }
         
         return registration;
+    }
+
+    /**
+     * Gets the remaining slots for an event
+     * @param eventId The ID of the event
+     * @return Number of remaining slots, or -1 if unlimited capacity
+     */
+    public static int getRemainingSlots(int eventId) {
+        Connection conn = DatabaseConnection.getConnection();
+        int remainingSlots = -1;
+
+        try {
+            // Get event's maxParticipants
+            String eventQuery = "SELECT maxParticipants FROM Event WHERE eventId = ?";
+            PreparedStatement eventStmt = conn.prepareStatement(eventQuery);
+            eventStmt.setInt(1, eventId);
+            ResultSet eventRs = eventStmt.executeQuery();
+            
+            if (eventRs.next()) {
+                Integer maxParticipants = (Integer) eventRs.getObject("maxParticipants");
+                
+                // If maxParticipants is NULL, return -1 (unlimited)
+                if (maxParticipants == null) {
+                    remainingSlots = -1;
+                } else {
+                    // Count current registrations with status='registered'
+                    String countQuery = "SELECT COUNT(*) as count FROM EventRegistration " +
+                                       "WHERE eventId = ? AND status = 'registered'";
+                    PreparedStatement countStmt = conn.prepareStatement(countQuery);
+                    countStmt.setInt(1, eventId);
+                    ResultSet countRs = countStmt.executeQuery();
+                    
+                    if (countRs.next()) {
+                        int currentCount = countRs.getInt("count");
+                        remainingSlots = maxParticipants - currentCount;
+                        // Ensure we don't return negative values
+                        if (remainingSlots < 0) {
+                            remainingSlots = 0;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(conn);
+        }
+
+        return remainingSlots;
     }
 }

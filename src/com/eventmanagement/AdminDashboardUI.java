@@ -6,6 +6,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -13,7 +15,7 @@ public class AdminDashboardUI extends JFrame implements ActionListener {
     private Admin admin;
     private JTable eventTable;
     private JButton viewPendingButton, viewAllButton, logoutButton;
-    private JButton approveButton, rejectButton, refreshButton;
+    private JButton approveButton, rejectButton, refreshButton, viewDetailsButton;
     private DefaultTableModel eventTableModel;
     private JLabel welcomeLabel, statusLabel;
     private boolean showingPendingOnly = false;
@@ -77,6 +79,19 @@ public class AdminDashboardUI extends JFrame implements ActionListener {
         eventTable.setRowHeight(25);
         eventTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         
+        // Add double-click listener for viewing event details
+        eventTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int selectedRow = eventTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        viewEventDetails();
+                    }
+                }
+            }
+        });
+        
         JScrollPane scrollPane = new JScrollPane(eventTable);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -102,9 +117,14 @@ public class AdminDashboardUI extends JFrame implements ActionListener {
         refreshButton.setFont(new Font("Arial", Font.PLAIN, 12));
         refreshButton.addActionListener(this);
         
+        viewDetailsButton = new JButton("View Event Details");
+        viewDetailsButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        viewDetailsButton.addActionListener(this);
+        
         actionPanel.add(approveButton);
         actionPanel.add(rejectButton);
         actionPanel.add(refreshButton);
+        actionPanel.add(viewDetailsButton);
         bottomPanel.add(actionPanel, BorderLayout.WEST);
         
         statusLabel = new JLabel("Ready");
@@ -244,8 +264,39 @@ public class AdminDashboardUI extends JFrame implements ActionListener {
             } else {
                 loadAllEvents();
             }
+        } else if (e.getSource() == viewDetailsButton) {
+            viewEventDetails();
         } else if (e.getSource() == logoutButton) {
             logout();
+        }
+    }
+
+    private void viewEventDetails() {
+        int selectedRow = eventTable.getSelectedRow();
+        
+        if (selectedRow < 0) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an event to view details.",
+                "No Event Selected",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get eventId from selected row (column 0)
+        int eventId = (int) eventTable.getValueAt(selectedRow, 0);
+        
+        // Fetch event details from database
+        Event event = EventDAO.getEventById(eventId);
+        
+        if (event != null) {
+            // Create and show EventDetailsUI dialog
+            EventDetailsUI detailsDialog = new EventDetailsUI(this, event);
+            detailsDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Failed to load event details. Event not found.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

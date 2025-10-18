@@ -22,7 +22,7 @@ public class UserAuthentication {
 
             if (rs.next()) {
                 String userType = rs.getString("userType");
-                if (userType.equals("event_manager")) {
+                if (userType.equalsIgnoreCase("EVENT_MANAGER")) {
                     // Create an Event manager object
                     user = new EventManagerUser();
                     user.setUserId(rs.getInt("userId"));
@@ -42,7 +42,7 @@ public class UserAuthentication {
                         eventManager.setEventManagerId(eventManagerRS.getInt("eventManagerId"));
                         eventManager.setEventManagerName(eventManagerRS.getString("eventManagerName"));
                     }
-                } else if (userType.equals("admin")) {
+                } else if (userType.equalsIgnoreCase("ADMIN")) {
                     // Create an Admin object
                     user = new Admin();
                     user.setUserId(rs.getInt("userId"));
@@ -62,7 +62,7 @@ public class UserAuthentication {
                         admin.setAdminId(adminRS.getInt("adminId"));
                         admin.setAdminName(adminRS.getString("adminName"));
                     }
-                } else if (userType.equals("participant")) {
+                } else if (userType.equalsIgnoreCase("PARTICIPANT")) {
                     // Create a Participant object
                     user = new Participant();
                     user.setUserId(rs.getInt("userId"));

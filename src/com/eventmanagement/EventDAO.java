@@ -30,18 +30,25 @@ public class EventDAO {
 
         try {
             String query = "INSERT INTO Event (eventTitle, eventDescription, eventType, eventDate, " +
-                          "eventStatus, managerId, hallId, approvalStatus) " +
-                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                          "eventStatus, managerId, hallId, approvalStatus, maxParticipants) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, event.getEventTitle());
             stmt.setString(2, event.getEventDescription());
             stmt.setString(3, event.getEventType());
             stmt.setDate(4, new java.sql.Date(event.getEventDate().getTime()));
-            stmt.setString(5, "pending"); // Legacy field
+            stmt.setString(5, "SCHEDULED"); // Default event status
             stmt.setInt(6, managerId);
             stmt.setInt(7, event.getHallId());
-            stmt.setString(8, "pending"); // Default approval status
+            stmt.setString(8, "PENDING"); // Default approval status
+            
+            // Handle maxParticipants (can be null for unlimited)
+            if (event.getMaxParticipants() != null) {
+                stmt.setInt(9, event.getMaxParticipants());
+            } else {
+                stmt.setNull(9, java.sql.Types.INTEGER);
+            }
             
             stmt.executeUpdate();
 
@@ -133,7 +140,7 @@ public class EventDAO {
             String query = "SELECT e.*, h.hallName " +
                           "FROM Event e " +
                           "LEFT JOIN Hall h ON e.hallId = h.hallId " +
-                          "WHERE e.approvalStatus = 'pending' " +
+                          "WHERE e.approvalStatus = 'PENDING' " +
                           "ORDER BY e.eventDate ASC";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -164,7 +171,7 @@ public class EventDAO {
             String query = "SELECT e.*, h.hallName " +
                           "FROM Event e " +
                           "LEFT JOIN Hall h ON e.hallId = h.hallId " +
-                          "WHERE e.approvalStatus = 'approved' " +
+                          "WHERE e.approvalStatus = 'APPROVED' " +
                           "ORDER BY e.eventDate ASC";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -196,7 +203,7 @@ public class EventDAO {
             String query = "SELECT e.*, h.hallName " +
                           "FROM Event e " +
                           "LEFT JOIN Hall h ON e.hallId = h.hallId " +
-                          "WHERE e.eventDate = ? AND e.approvalStatus = 'approved' " +
+                          "WHERE e.eventDate = ? AND e.approvalStatus = 'APPROVED' " +
                           "ORDER BY e.eventTitle";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -227,7 +234,7 @@ public class EventDAO {
         boolean success = false;
 
         try {
-            String query = "UPDATE Event SET approvalStatus = 'approved', eventStatus = 'Approved', " +
+            String query = "UPDATE Event SET approvalStatus = 'APPROVED', eventStatus = 'SCHEDULED', " +
                           "approvedBy = ?, approvalDate = NOW() WHERE eventId = ?";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -256,7 +263,7 @@ public class EventDAO {
         boolean success = false;
 
         try {
-            String query = "UPDATE Event SET approvalStatus = 'rejected', eventStatus = 'Rejected', " +
+            String query = "UPDATE Event SET approvalStatus = 'REJECTED', eventStatus = 'CANCELLED', " +
                           "approvedBy = ?, approvalDate = NOW() WHERE eventId = ?";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -391,6 +398,72 @@ public class EventDAO {
             event.setApprovalDate(new Date(approvalTimestamp.getTime()));
         }
         
+        // Handle maxParticipants (can be null for unlimited)
+        Integer maxParticipants = (Integer) rs.getObject("maxParticipants");
+        event.setMaxParticipants(maxParticipants);
+        
         return event;
+    }
+
+    /**
+     * Gets the remaining slots for an event
+     * @param eventId The ID of the event
+     * @return Number of remaining slots, or -1 if unlimited capacity
+     */
+    public static int getRemainingSlots(int eventId) {
+        Connection conn = DatabaseConnection.getConnection();
+        int remainingSlots = -1;
+
+        try {
+            String query = "SELECT e.maxParticipants, COUNT(er.registrationId) as currentRegistrations " +
+                          "FROM Event e " +
+                          "LEFT JOIN EventRegistration er ON e.eventId = er.eventId " +
+                          "AND er.status != 'CANCELLED' " +
+                          "WHERE e.eventId = ? " +
+                          "GROUP BY e.eventId, e.maxParticipants";
+            
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, eventId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Integer maxParticipants = (Integer) rs.getObject("maxParticipants");
+                
+                // If maxParticipants is null, return -1 (unlimited)
+                if (maxParticipants == null) {
+                    remainingSlots = -1;
+                } else {
+                    int currentRegistrations = rs.getInt("currentRegistrations");
+                    remainingSlots = maxParticipants - currentRegistrations;
+                    // Ensure we don't return negative values
+                    if (remainingSlots < 0) {
+                        remainingSlots = 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(conn);
+        }
+
+        return remainingSlots;
+    }
+
+    /**
+     * Checks if an event is full (at maximum capacity)
+     * @param eventId The ID of the event
+     * @return true if event is full, false if slots available or unlimited
+     */
+    public static boolean isEventFull(int eventId) {
+        int remainingSlots = getRemainingSlots(eventId);
+        
+        // -1 means unlimited capacity, so event is never full
+        if (remainingSlots == -1) {
+            return false;
+        }
+        
+        // Event is full if remaining slots is 0
+        return remainingSlots == 0;
     }
 }
