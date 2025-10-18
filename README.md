@@ -1,95 +1,135 @@
-# Event Management System - Intermediate Level
+🎯 Event Management System (Java + MySQL)
 
-This project is an Event Management System implemented in Java using Swing for the user interface and MySQL for data persistence. It provides basic functionalities for customers to create and manage events, attendees, and special requests, and for administrators to oversee and manage all events.
+A desktop-based event management system built using Java Swing and MySQL, featuring role-based access, admin approval workflows, and smart hall booking.
 
-## Features
+📘 Overview
 
-**For Customers:**
+This system helps institutions plan, approve, and manage events efficiently — from event creation to participant registration — all through a clean, intuitive desktop app.
 
-*   **Registration and Login:** Customers can register with the system and log in to access their dashboard.
-*   **Event Creation:**  Customers can create events by providing details like title, description, type, date, and status.
-*   **Attendee Management:**  Customers can add attendees to their events.
-*   **Special Requests:** Customers can submit special requests related to their events.
-*   **View Event Details:** Customers can view the details of their created events. 
+Key Highlights:
 
-**For Administrators:**
+🎭 Three User Roles: Admin, Event Manager, Participant
+✅ Event Approval Workflow (Admin-controlled)
+🏛️ Smart Hall Booking: Prevents double bookings
+🔐 User Authentication with session management
+💡 Color-coded Status: Pending 🟠 | Approved 🟢 | Rejected 🔴
 
-*   **Login:**  Administrators can log in to access their dashboard.
-*   **View All Events:** Administrators can view a list of all events created by all customers.
-*   **Approve/Reject Events:** Administrators have the ability to approve or reject pending events.
-*   **View Event Details:** Administrators can view detailed information for any event.
-*   **Refresh Event List:** The administrator dashboard can be refreshed to get the latest event data.
+⚙️ Features
+👨‍💼 Administrator
+Approve / Reject Events
+View Pending & All Events
+Track who approved or rejected events
+Real-time dashboard refresh
 
-## Technologies Used
+🎪 Event Manager
+Create Events (Title, Type, Description, Date, Hall)
+View own events with approval status
+View all approved events
 
-*   **Java:** The core programming language.
-*   **Swing:** Used for building the graphical user interface (GUI).
-*   **MySQL:** The database for storing user data, event information, attendees, and special requests.
-*   **JDBC:** Used for connecting to the MySQL database and performing database operations.
+👤 Participant
+Browse and register for approved events
+View and cancel registrations
+Prevent duplicate registrations
+Search by title, date, hall, or type
 
-## Database Schema
+🧱 System Architecture
+Three-Tier Architecture:
+Presentation Layer – Java Swing UIs (Dashboards, Forms, Dialogs)
+Business Logic Layer – Managers, DAO classes, authentication
+Data Layer – MySQL database with JDBC connectivity
 
-The system uses the following tables in the MySQL database:
+🗄️ Database Schema (Simplified)
+Core Tables:
+User, EventManager, Admin, Participant, Hall, Event, EventRegistration
 
-*   **User:** Stores user information (userId, username, password, email, userType).
-*   **Customer:** Stores customer-specific information (customerId, customerName, userId).
-*   **Administrator:** Stores administrator-specific information (adminId, adminName, userId).
-*   **Event:**  Stores event details (eventId, eventTitle, eventDescription, eventType, eventDate, eventStatus, customerId).
-*   **Attendee:**  Stores attendee information (attendeeId, attendeeName, eventId).
-*   **SpecialRequest:** Stores special requests related to events (requestId, requestDescription, eventId).
-*    +-------+      1      +--------------+
-     | User  |------<>-----| Customer    |
-     +-------+             +-------------+
-       |                        |
-       |                        |
-       1                        1
-       |                        |
-  +---------------+        +-------+
-  | Administrator |        | Event |
-  +---------------+        +-------+
-                               |
-                               |
-                     1         N
-                     |         |
-           +----------+  +----------------+
-           | Attendee |  | SpecialRequest |
-           +----------+  +----------------+
+💡 Relationships:
+One EventManager → Many Events
+One Event → Many EventRegistrations
+Admin approves or rejects events
 
-## Getting Started
+🧰 Technologies Used
+Category	Tech
+Language	Java SE 11+
+GUI	Swing / AWT
+Database	MySQL 8.0+
+Connectivity	JDBC (MySQL Connector/J)
+Patterns	DAO, Singleton, MVC (partial), Factory
+IDEs	Eclipse / IntelliJ IDEA / NetBeans
+🚀 Installation & Setup
 
-1.  **Database Setup:**
-    *   Create a database named "event\_management\_system" in your MySQL server.
-    *   Create the tables listed in the "Database Schema" section by running the provided SQL scripts (You can find these scripts in the project code comments).
+1️⃣ Prerequisites
+JDK 11+
+MySQL 8.0+
+MySQL Connector/J
+Any Java IDE
 
-2.  **Project Setup:**
-    *   Import the project into Eclipse (or your preferred Java IDE).
-    *   Configure the build path to include the JUnit and MySQL Connector/J (JDBC driver) libraries. You can download the Connector/J JAR file from the MySQL website: [https://dev.mysql.com/downloads/connector/j/](https://dev.mysql.com/downloads/connector/j/)
-    *   Update the database connection details (URL, username, password) in `DatabaseConnection.java` to match your MySQL setup.
+2️⃣ Database Setup
+CREATE DATABASE event_management_system;
+-- Run table creation SQL scripts (provided in /database/ or documentation)
 
-3.  **Running the Application:**
-    *   Run the `WelcomePageUI.java` file as a Java application.
-    *   Register as a customer or administrator, log in, and interact with the system's functionalities.
-  
-4.  **Demo of the Application:**
-    *![image](https://github.com/Sama1504/Event_Management_System/assets/96735639/d742b35c-82e8-4809-936e-11ddb495afe8)
-    
-    * ![image](https://github.com/Sama1504/Event_Management_System/assets/96735639/3823554d-9f14-460b-a72c-d9144f9b4d69)
-    
-    * https://github.com/Sama1504/Event_Management_System/assets/96735639/3e4c23a9-488c-4a03-835c-8b4ac08339cf
+3️⃣ Configure Database Connection
+Edit DatabaseConnection.java:
+private static final String URL = "jdbc:mysql://localhost:3306/event_management_system";
+private static final String USERNAME = "your_username";
+private static final String PASSWORD = "your_password";
 
-    * https://github.com/Sama1504/Event_Management_System/assets/96735639/1e78c42e-5713-4943-88cd-983a96a3eac3
+4️⃣ Run the App
 
-## Future Enhancements
+Open and run:
+src/com/eventmanagement/ui/WelcomePageUI.java
 
-This project can be further enhanced with the following features:
+🧭 Workflow Example
 
-*   **Password Hashing:**  Implement password hashing for security.
-*   **Input Validation:** Add robust input validation for all forms.
-*   **Advanced UI Features:** Implement a visual calendar, user profile management, email notifications, and improved table formatting.
-*   **Event Capacity:**  Add event capacity limits and handle registration accordingly.
-*   **Search and Filtering:** Implement search and filtering options for events and attendees.
-*   **Reporting and Analytics:**  Generate reports on event attendance, revenue, and customer behavior.
+1. Event Manager: Creates an event → waits for admin approval
+2. Admin: Approves/rejects event → visible to participants
+3. Participant: Registers → views/cancels registration
 
-## Contributing
+📂 Project Structure
+Event_Management_System/
+├── src/com/eventmanagement/
+│   ├── model/ (User, Event, Hall, Participant…)
+│   ├── dao/ (EventDAO, HallDAO, RegistrationDAO…)
+│   ├── ui/ (Dashboards, Login, Registration, Event Creation)
+│   ├── manager/ (Business logic)
+│   ├── auth/ (Login & Session)
+│   └── utils/ (DatabaseConnection)
+├── lib/mysql-connector-java.jar
+└── README.md
 
-Contributions are welcome! If you'd like to contribute to this project, please fork the repository and submit a pull request.
+🔒 Security Notes
+
+⚠️ Current Issues:
+Passwords stored in plain text
+Hardcoded DB credentials
+No session timeout
+
+🧩 Recommended Fixes:
+Implement BCrypt password hashing
+Move DB credentials to environment variables
+Add input validation & logging
+
+🐞 Known Limitations
+❌ No event editing or deletion
+⚠️ No email notifications
+🚫 Capacity not enforced
+🕒 No transaction management
+🔁 Some code duplication
+
+💡 Future Enhancements
+ Password hashing with BCrypt
+ Event editing & deletion
+ Email notifications for approvals
+ Capacity enforcement
+ Transaction & connection pooling
+ Event calendar + search filters
+ Spring Boot migration (optional)
+
+🧩 Troubleshooting
+Issue	Quick Fix
+❌ com.mysql.cj.jdbc.Driver not found	Add MySQL connector JAR to build path
+🚫 Access denied for user	Check MySQL username/password
+⚙️ Tables not found	Run all SQL scripts in MySQL
+🏛️ No halls available	Ensure hall data exists & is marked available
+
+📄 License
+This project is developed for educational purposes. Feel free to use, modify, and distribute as needed.
