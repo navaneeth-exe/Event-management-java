@@ -1,6 +1,7 @@
 package com.eventmanagement;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -34,37 +35,56 @@ public class EventManagerDashboardUI extends JFrame implements ActionListener {
 
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(new Color(237, 244, 237));
+        mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
         // Top Panel - Welcome and Menu
         JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(new Color(237, 244, 237));
+        topPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(171, 209, 181), 1),
+            "Event Manager Dashboard",
+            0, 0,
+            new Font("Segoe UI", Font.BOLD, 12),
+            new Color(46, 71, 86)
+        ));
         
         // Welcome message
         welcomeLabel = new JLabel("Welcome, " + eventManager.getEventManagerName() + " (Event Manager)");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        welcomeLabel.setForeground(new Color(34, 56, 88));
         topPanel.add(welcomeLabel, BorderLayout.NORTH);
 
         // Menu buttons
         JPanel menuPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        menuPanel.setBackground(new Color(237, 244, 237));
         
         createEventButton = new JButton("Create New Event");
-        createEventButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        createEventButton.setBackground(new Color(0, 123, 255));
+        createEventButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        createEventButton.setBackground(new Color(25, 123, 189));
         createEventButton.setForeground(Color.WHITE);
+        createEventButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         createEventButton.addActionListener(this);
         
         myEventsButton = new JButton("My Events");
-        myEventsButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        myEventsButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        myEventsButton.setBackground(new Color(107, 127, 215));
+        myEventsButton.setForeground(Color.WHITE);
+        myEventsButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         myEventsButton.addActionListener(this);
         
         viewApprovedButton = new JButton("View All Approved Events");
-        viewApprovedButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        viewApprovedButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        viewApprovedButton.setBackground(new Color(107, 127, 215));
+        viewApprovedButton.setForeground(Color.WHITE);
+        viewApprovedButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         viewApprovedButton.addActionListener(this);
         
         logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        logoutButton.setBackground(new Color(220, 53, 69));
+        logoutButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        logoutButton.setBackground(new Color(193, 18, 31));
         logoutButton.setForeground(Color.WHITE);
+        logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutButton.addActionListener(this);
         
         menuPanel.add(createEventButton);
@@ -85,8 +105,31 @@ public class EventManagerDashboardUI extends JFrame implements ActionListener {
         };
         eventTable.setModel(eventTableModel);
         eventTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        eventTable.setRowHeight(25);
-        eventTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        eventTable.setRowHeight(30);
+        eventTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        eventTable.getTableHeader().setBackground(new Color(34, 56, 88));
+        eventTable.getTableHeader().setForeground(Color.WHITE);
+        eventTable.setGridColor(new Color(224, 224, 224));
+        eventTable.setShowVerticalLines(true);
+        eventTable.setSelectionBackground(new Color(25, 123, 189));
+        eventTable.setSelectionForeground(Color.WHITE);
+        
+        // Set alternating row colors
+        eventTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    if (row % 2 == 0) {
+                        c.setBackground(Color.WHITE);
+                    } else {
+                        c.setBackground(new Color(245, 249, 245));
+                    }
+                }
+                return c;
+            }
+        });
         
         // Add double-click listener for viewing event details
         eventTable.addMouseListener(new MouseAdapter() {
@@ -106,23 +149,28 @@ public class EventManagerDashboardUI extends JFrame implements ActionListener {
 
         // Bottom Panel - Action buttons and status
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(new Color(237, 244, 237));
         
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        actionPanel.setBackground(new Color(237, 244, 237));
         
         refreshButton = new JButton("Refresh");
-        refreshButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         refreshButton.addActionListener(this);
         actionPanel.add(refreshButton);
         
         viewDetailsButton = new JButton("View Event Details");
-        viewDetailsButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        viewDetailsButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        viewDetailsButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         viewDetailsButton.addActionListener(this);
         actionPanel.add(viewDetailsButton);
         
         bottomPanel.add(actionPanel, BorderLayout.WEST);
         
         statusLabel = new JLabel("Ready");
-        statusLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        statusLabel.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        statusLabel.setForeground(new Color(34, 56, 88));
         bottomPanel.add(statusLabel, BorderLayout.EAST);
         
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -202,13 +250,13 @@ public class EventManagerDashboardUI extends JFrame implements ActionListener {
                 if (!isSelected) {
                     String status = value.toString().toUpperCase();
                     if (status.equals("PENDING")) {
-                        c.setBackground(new Color(255, 193, 7)); // Orange
+                        c.setBackground(new Color(255, 155, 113));
                         c.setForeground(Color.BLACK);
                     } else if (status.equals("APPROVED")) {
-                        c.setBackground(new Color(40, 167, 69)); // Green
+                        c.setBackground(new Color(82, 183, 136));
                         c.setForeground(Color.WHITE);
                     } else if (status.equals("REJECTED")) {
-                        c.setBackground(new Color(220, 53, 69)); // Red
+                        c.setBackground(new Color(217, 4, 41));
                         c.setForeground(Color.WHITE);
                     } else {
                         c.setBackground(Color.WHITE);

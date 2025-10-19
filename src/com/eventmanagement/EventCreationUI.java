@@ -1,6 +1,8 @@
 package com.eventmanagement;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,18 +47,27 @@ public class EventCreationUI extends JFrame implements ActionListener {
     
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(new Color(237, 244, 237));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         
         // Title
         JLabel titleLabel = new JLabel("Create New Event");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(46, 71, 86));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
         
         // Form Panel
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(new Color(237, 244, 237));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        // Create compound border for text fields
+        CompoundBorder textFieldBorder = BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(171, 209, 181), 1),
+            new EmptyBorder(5, 10, 5, 10)
+        );
         
         int row = 0;
         
@@ -70,6 +81,7 @@ public class EventCreationUI extends JFrame implements ActionListener {
         gbc.gridx = 1;
         gbc.weightx = 0.7;
         titleField = new JTextField(30);
+        titleField.setBorder(textFieldBorder);
         formPanel.add(titleField, gbc);
         
         row++;
@@ -86,7 +98,9 @@ public class EventCreationUI extends JFrame implements ActionListener {
         descriptionArea = new JTextArea(5, 30);
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
+        descriptionArea.setBorder(textFieldBorder);
         JScrollPane descScrollPane = new JScrollPane(descriptionArea);
+        descScrollPane.setBorder(BorderFactory.createLineBorder(new Color(171, 209, 181), 1));
         formPanel.add(descScrollPane, gbc);
         
         row++;
@@ -143,6 +157,7 @@ public class EventCreationUI extends JFrame implements ActionListener {
         gbc.gridx = 1;
         gbc.weightx = 0.7;
         JPanel hallPanel = new JPanel(new BorderLayout(5, 0));
+        hallPanel.setBackground(new Color(237, 244, 237));
         hallCombo = new JComboBox<>();
         hallPanel.add(hallCombo, BorderLayout.CENTER);
         
@@ -207,15 +222,22 @@ public class EventCreationUI extends JFrame implements ActionListener {
         
         // Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        buttonPanel.setBackground(new Color(237, 244, 237));
         
         submitButton = new JButton("Create Event");
-        submitButton.setBackground(new Color(40, 167, 69));
+        submitButton.setBackground(new Color(25, 123, 189));
         submitButton.setForeground(Color.WHITE);
-        submitButton.setFont(new Font("Arial", Font.BOLD, 14));
+        submitButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        submitButton.setPreferredSize(new Dimension(150, 40));
+        submitButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         submitButton.addActionListener(this);
         
         cancelButton = new JButton("Cancel");
-        cancelButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        cancelButton.setBackground(Color.WHITE);
+        cancelButton.setForeground(new Color(46, 71, 86));
+        cancelButton.setBorder(BorderFactory.createLineBorder(new Color(46, 71, 86), 2));
+        cancelButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         cancelButton.addActionListener(this);
         
         buttonPanel.add(cancelButton);

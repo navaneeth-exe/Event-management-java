@@ -1,6 +1,9 @@
 package com.eventmanagement;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,8 +13,11 @@ import java.awt.event.ActionListener;
  */
 public class LoginFormUI extends JFrame implements ActionListener {
     private static final String TITLE = "Login";
-    private static final int WIDTH = 300;
-    private static final int HEIGHT = 200;
+    private static final int WIDTH = 400;
+    private static final int HEIGHT = 300;
+    private static final Color BG = new Color(237, 244, 237);
+    private static final Color PRIMARY = new Color(25, 123, 189);
+    private static final Color LABEL_COLOR = new Color(46, 71, 86);
 
     private JTextField userNameTextField;
     private JPasswordField passwordField;
@@ -28,35 +34,68 @@ public class LoginFormUI extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBackground(BG);
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         GridBagConstraints constraints = new GridBagConstraints();
 
+        // Title
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.insets = new Insets(10, 10, 10, 10);
-        mainPanel.add(new JLabel("Username:"), constraints);
+        constraints.gridwidth = 2;
+        constraints.insets = new Insets(10, 10, 15, 10);
+        JLabel titleLabel = new JLabel("Login to Your Account");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setForeground(LABEL_COLOR);
+        mainPanel.add(titleLabel, constraints);
+
+        // Reset gridwidth for form rows
+        constraints.gridwidth = 1;
+
+        // Borders for text fields
+        Border line = BorderFactory.createLineBorder(new Color(171, 209, 181), 1);
+        Border padding = new EmptyBorder(5, 10, 5, 10);
+        Border textBorder = new CompoundBorder(line, padding);
+
+        // Username
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.insets = new Insets(5, 10, 5, 10);
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setForeground(LABEL_COLOR);
+        mainPanel.add(userLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 0;
+        constraints.gridy = 1;
         userNameTextField = new JTextField(20);
+        userNameTextField.setBorder(textBorder);
         mainPanel.add(userNameTextField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 1;
-        mainPanel.add(new JLabel("Password:"), constraints);
+        constraints.gridy = 2;
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setForeground(LABEL_COLOR);
+        mainPanel.add(passLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         passwordField = new JPasswordField(20);
+        passwordField.setBorder(textBorder);
         mainPanel.add(passwordField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 2;
+        constraints.gridy = 3;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
         loginButton = new JButton("Login");
+        loginButton.setBackground(PRIMARY);
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        loginButton.setPreferredSize(new Dimension(200, 40));
+        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         loginButton.addActionListener(this);
         mainPanel.add(loginButton, constraints);
 
+        getContentPane().setBackground(BG);
         add(mainPanel, BorderLayout.CENTER);
     }
 

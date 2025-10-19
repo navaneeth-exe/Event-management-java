@@ -1,6 +1,7 @@
 package com.eventmanagement;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -37,14 +38,17 @@ public class EventDetailsUI extends JDialog implements ActionListener {
 
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setBackground(new Color(237, 244, 237));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // TOP PANEL - Event Information
         JPanel topPanel = new JPanel(new BorderLayout(10, 10));
+        topPanel.setBackground(new Color(237, 244, 237));
         topPanel.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(), "Event Information"));
 
         JPanel infoPanel = new JPanel(new GridLayout(6, 2, 10, 8));
+        infoPanel.setBackground(new Color(237, 244, 237));
         
         // Event Title
         JLabel titleLabelHeader = new JLabel("Event Title:");
@@ -112,6 +116,7 @@ public class EventDetailsUI extends JDialog implements ActionListener {
 
         // CENTER PANEL - Participants Table
         JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+        centerPanel.setBackground(new Color(237, 244, 237));
         centerPanel.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(), "Registered Participants"));
 
@@ -133,7 +138,9 @@ public class EventDetailsUI extends JDialog implements ActionListener {
         participantsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         participantsTable.setRowHeight(30);  // Increased from 25 to 30 for better visibility
         participantsTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        participantsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        participantsTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        participantsTable.getTableHeader().setBackground(new Color(25, 123, 189));
+        participantsTable.getTableHeader().setForeground(Color.WHITE);
         participantsTable.setFillsViewportHeight(true);  // Ensure table fills the viewport
         
         // Hide Participant ID column
@@ -149,17 +156,20 @@ public class EventDetailsUI extends JDialog implements ActionListener {
 
         // BOTTOM PANEL - Buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        bottomPanel.setBackground(new Color(237, 244, 237));
         
         refreshButton = new JButton("Refresh");
-        refreshButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        refreshButton.setBackground(new Color(0, 123, 255));
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        refreshButton.setBackground(new Color(107, 127, 215));
         refreshButton.setForeground(Color.WHITE);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         refreshButton.addActionListener(this);
         
         closeButton = new JButton("Close");
-        closeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        closeButton.setBackground(new Color(108, 117, 125));
+        closeButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        closeButton.setBackground(new Color(46, 71, 86));
         closeButton.setForeground(Color.WHITE);
+        closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         closeButton.addActionListener(this);
         
         bottomPanel.add(refreshButton);

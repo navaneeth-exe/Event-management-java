@@ -1,6 +1,9 @@
 package com.eventmanagement;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,72 +17,112 @@ public class RegistrationFormUI extends JFrame implements ActionListener {
     public RegistrationFormUI() {
         setTitle("Registration");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(400, 300);
+        setSize(500, 450);
         setLocationRelativeTo(null);
+
+        Color BG = new Color(237, 244, 237);
+        Color LABEL_COLOR = new Color(46, 71, 86);
+        Color PRIMARY = new Color(25, 123, 189);
 
         // Use GridBagLayout for more flexible layout
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(BG);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5); // Add padding
 
-        // Username
+        // Borders for fields
+        Border line = BorderFactory.createLineBorder(new Color(171, 209, 181), 1);
+        Border padding = new EmptyBorder(5, 10, 5, 10);
+        Border fieldBorder = new CompoundBorder(line, padding);
+
+        // Title
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 15, 5);
+        JLabel title = new JLabel("Create New Account");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setForeground(LABEL_COLOR);
+        panel.add(title, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Username
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Username:"), gbc);
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setForeground(LABEL_COLOR);
+        panel.add(userLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         usernameField = new JTextField();
+        usernameField.setBorder(fieldBorder);
         panel.add(usernameField, gbc);
 
         // Email
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Email:"), gbc);
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setForeground(LABEL_COLOR);
+        panel.add(emailLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         emailField = new JTextField();
+        emailField.setBorder(fieldBorder);
         panel.add(emailField, gbc);
 
         // Password
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Password:"), gbc);
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setForeground(LABEL_COLOR);
+        panel.add(passLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         passwordField = new JPasswordField();
+        passwordField.setBorder(fieldBorder);
         panel.add(passwordField, gbc);
 
         // Name
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Name:"), gbc);
+        JLabel nameLabel = new JLabel("Name:");
+        nameLabel.setForeground(LABEL_COLOR);
+        panel.add(nameLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         nameField = new JTextField();
+        nameField.setBorder(fieldBorder);
         panel.add(nameField, gbc);
 
         // User Type
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("User Type:"), gbc);
+        JLabel typeLabel = new JLabel("User Type:");
+        typeLabel.setForeground(LABEL_COLOR);
+        panel.add(typeLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         JPanel userTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        userTypePanel.setBackground(BG);
         eventManagerRadioButton = new JRadioButton("Event Manager");
         adminRadioButton = new JRadioButton("Admin");
         participantRadioButton = new JRadioButton("Participant");
@@ -95,24 +138,33 @@ public class RegistrationFormUI extends JFrame implements ActionListener {
 
         // Phone Number (for Participant)
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Phone Number:"), gbc);
+        JLabel phoneLabel = new JLabel("Phone Number:");
+        phoneLabel.setForeground(LABEL_COLOR);
+        panel.add(phoneLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         phoneField = new JTextField();
+        phoneField.setBorder(fieldBorder);
         panel.add(phoneField, gbc);
 
         // Register Button
         gbc.gridx = 1;
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         gbc.anchor = GridBagConstraints.EAST; // Align button to the right
         registerButton = new JButton("Register");
+        registerButton.setBackground(PRIMARY);
+        registerButton.setForeground(Color.WHITE);
+        registerButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        registerButton.setPreferredSize(new Dimension(200, 40));
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         registerButton.addActionListener(this);
         panel.add(registerButton, gbc);
 
+        getContentPane().setBackground(BG);
         add(panel, BorderLayout.CENTER);
     }
 
