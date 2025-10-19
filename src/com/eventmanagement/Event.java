@@ -29,8 +29,8 @@ public class Event {
         this.eventDate = eventDate;
         this.managerId = managerId;
         this.hallId = hallId;
-        this.approvalStatus = "pending"; // Default status
-        this.eventStatus = "pending"; // Legacy field
+        this.approvalStatus = "PENDING"; // Default status
+        this.eventStatus = "SCHEDULED"; // Legacy field
     }
 
     // Getters and Setters

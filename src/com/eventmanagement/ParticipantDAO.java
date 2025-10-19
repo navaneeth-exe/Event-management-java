@@ -227,7 +227,7 @@ public class ParticipantDAO {
 
         try {
             String query = "SELECT COUNT(*) as count FROM EventRegistration " +
-                          "WHERE participantId = ? AND status = 'registered'";
+                          "WHERE participantId = ? AND status = 'REGISTERED'";
             
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, participantId);

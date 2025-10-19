@@ -223,7 +223,7 @@ public class ParticipantDashboardUI extends JFrame implements ActionListener {
             participant.getParticipantId());
         
         for (EventRegistration registration : registrations) {
-            String actionText = registration.getStatus().equals("registered") ? "Cancel" : "Cancelled";
+            String actionText = registration.getStatus().equals("REGISTERED") ? "Cancel" : "Cancelled";
             
             eventTableModel.addRow(new Object[]{
                 registration.getRegistrationId(),

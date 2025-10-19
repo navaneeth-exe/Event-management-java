@@ -349,8 +349,8 @@ public class EventCreationUI extends JFrame implements ActionListener {
         newEvent.setEventDate(eventDate);
         newEvent.setHallId(selectedHall.getHallId());
         newEvent.setManagerId(eventManagerId);
-        newEvent.setApprovalStatus("pending");
-        newEvent.setEventStatus("pending");
+        newEvent.setApprovalStatus("PENDING");
+        newEvent.setEventStatus("SCHEDULED");
         
         // Set max participants
         if (unlimitedCheckBox.isSelected()) {

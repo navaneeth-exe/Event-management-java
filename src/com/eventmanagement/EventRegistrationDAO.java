@@ -38,9 +38,9 @@ public class EventRegistrationDAO {
                 
                 // Only check capacity if maxParticipants is not NULL (unlimited)
                 if (maxParticipants != null) {
-                    // Count current registrations with status='registered'
+                    // Count current registrations with status='REGISTERED'
                     String countQuery = "SELECT COUNT(*) as count FROM EventRegistration " +
-                                       "WHERE eventId = ? AND status = 'registered'";
+                                       "WHERE eventId = ? AND status = 'REGISTERED'";
                     PreparedStatement countStmt = conn.prepareStatement(countQuery);
                     countStmt.setInt(1, eventId);
                     ResultSet countRs = countStmt.executeQuery();
@@ -63,17 +63,49 @@ public class EventRegistrationDAO {
         int generatedId = -1;
 
         try {
-            String query = "INSERT INTO EventRegistration (eventId, participantId, registrationDate, status) " +
-                          "VALUES (?, ?, NOW(), 'registered')";
-            
-            PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            stmt.setInt(1, eventId);
-            stmt.setInt(2, participantId);
-            stmt.executeUpdate();
+            // First, check if there's ANY existing registration for this event and participant
+            String findExistingQuery = "SELECT registrationId, status FROM EventRegistration " +
+                                       "WHERE eventId = ? AND participantId = ?";
+            PreparedStatement findStmt = conn.prepareStatement(findExistingQuery);
+            findStmt.setInt(1, eventId);
+            findStmt.setInt(2, participantId);
+            ResultSet existingRs = findStmt.executeQuery();
 
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                generatedId = generatedKeys.getInt(1);
+            if (existingRs.next()) {
+                // Found an existing registration
+                int registrationId = existingRs.getInt("registrationId");
+                String currentStatus = existingRs.getString("status");
+                
+                if ("CANCELLED".equals(currentStatus)) {
+                    // Reactivate the cancelled registration
+                    String reactivateQuery = "UPDATE EventRegistration SET status = 'REGISTERED', registrationDate = NOW() " +
+                                            "WHERE registrationId = ?";
+                    PreparedStatement reactivateStmt = conn.prepareStatement(reactivateQuery);
+                    reactivateStmt.setInt(1, registrationId);
+                    int rowsUpdated = reactivateStmt.executeUpdate();
+                    
+                    if (rowsUpdated > 0) {
+                        generatedId = registrationId; // Return the reactivated registration ID
+                    }
+                } else {
+                    // Already registered - this shouldn't happen due to earlier check, but handle it
+                    DatabaseConnection.closeConnection(conn);
+                    throw new IllegalStateException("Participant is already registered for this event.");
+                }
+            } else {
+                // No existing registration found, insert a new one
+                String query = "INSERT INTO EventRegistration (eventId, participantId, registrationDate, status) " +
+                              "VALUES (?, ?, NOW(), 'REGISTERED')";
+                
+                PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                stmt.setInt(1, eventId);
+                stmt.setInt(2, participantId);
+                stmt.executeUpdate();
+
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    generatedId = generatedKeys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,7 +126,7 @@ public class EventRegistrationDAO {
         boolean success = false;
 
         try {
-            String query = "UPDATE EventRegistration SET status = 'cancelled' WHERE registrationId = ?";
+            String query = "UPDATE EventRegistration SET status = 'CANCELLED' WHERE registrationId = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, registrationId);
             
@@ -190,7 +222,7 @@ public class EventRegistrationDAO {
 
         try {
             String query = "SELECT COUNT(*) as count FROM EventRegistration " +
-                          "WHERE eventId = ? AND participantId = ? AND status = 'registered'";
+                          "WHERE eventId = ? AND participantId = ? AND status = 'REGISTERED'";
             
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, eventId);
@@ -220,7 +252,7 @@ public class EventRegistrationDAO {
 
         try {
             String query = "SELECT COUNT(*) as count FROM EventRegistration " +
-                          "WHERE eventId = ? AND status = 'registered'";
+                          "WHERE eventId = ? AND status = 'REGISTERED'";
             
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, eventId);
@@ -285,7 +317,7 @@ public class EventRegistrationDAO {
                           "INNER JOIN Participant p ON er.participantId = p.participantId " +
                           "INNER JOIN Event e ON er.eventId = e.eventId " +
                           "LEFT JOIN Hall h ON e.hallId = h.hallId " +
-                          "WHERE er.status = 'registered' " +
+                          "WHERE er.status = 'REGISTERED' " +
                           "ORDER BY er.registrationDate DESC";
             
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -359,9 +391,9 @@ public class EventRegistrationDAO {
                 if (maxParticipants == null) {
                     remainingSlots = -1;
                 } else {
-                    // Count current registrations with status='registered'
+                    // Count current registrations with status='REGISTERED'
                     String countQuery = "SELECT COUNT(*) as count FROM EventRegistration " +
-                                       "WHERE eventId = ? AND status = 'registered'";
+                                       "WHERE eventId = ? AND status = 'REGISTERED'";
                     PreparedStatement countStmt = conn.prepareStatement(countQuery);
                     countStmt.setInt(1, eventId);
                     ResultSet countRs = countStmt.executeQuery();

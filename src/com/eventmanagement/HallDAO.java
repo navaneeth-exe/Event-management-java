@@ -57,7 +57,7 @@ public class HallDAO {
                           "AND h.hallId NOT IN (" +
                           "    SELECT e.hallId FROM Event e " +
                           "    WHERE e.eventDate = ? " +
-                          "    AND e.eventStatus = 'Approved'" +
+                          "    AND e.approvalStatus = 'APPROVED'" +
                           ") " +
                           "ORDER BY h.hallName";
             
@@ -109,7 +109,7 @@ public class HallDAO {
 
                 // Check if there's an approved event on this date for this hall
                 String eventQuery = "SELECT COUNT(*) as eventCount FROM Event " +
-                                   "WHERE hallId = ? AND eventDate = ? AND eventStatus = 'Approved'";
+                                   "WHERE hallId = ? AND eventDate = ? AND approvalStatus = 'APPROVED'";
                 PreparedStatement eventStmt = conn.prepareStatement(eventQuery);
                 eventStmt.setInt(1, hallId);
                 eventStmt.setDate(2, new java.sql.Date(eventDate.getTime()));

@@ -127,11 +127,11 @@ public class RegistrationFormUI extends JFrame implements ActionListener {
             String userType;
             
             if (eventManagerRadioButton.isSelected()) {
-                userType = "event_manager";
+                userType = "EVENT_MANAGER";
             } else if (adminRadioButton.isSelected()) {
-                userType = "admin";
+                userType = "ADMIN";
             } else {
-                userType = "participant";
+                userType = "PARTICIPANT";
             }
 
             // Input Validation
@@ -141,17 +141,17 @@ public class RegistrationFormUI extends JFrame implements ActionListener {
             }
             
             // Validate phone number for participants
-            if (userType.equals("participant") && phone.isEmpty()) {
+            if (userType.equals("PARTICIPANT") && phone.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Phone number is required for participants.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             // Create a User object
             User user;
-            if (userType.equals("event_manager")) {
+            if (userType.equals("EVENT_MANAGER")) {
                 user = new EventManagerUser();
                 ((EventManagerUser) user).setEventManagerName(name);
-            } else if (userType.equals("admin")) {
+            } else if (userType.equals("ADMIN")) {
                 user = new Admin();
                 ((Admin) user).setAdminName(name);
             } else {

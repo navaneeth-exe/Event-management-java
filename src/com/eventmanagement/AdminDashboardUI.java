@@ -226,14 +226,14 @@ public class AdminDashboardUI extends JFrame implements ActionListener {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 
                 if (!isSelected) {
-                    String status = value.toString().toLowerCase();
-                    if (status.equals("pending")) {
+                    String status = value.toString().toUpperCase();
+                    if (status.equals("PENDING")) {
                         c.setBackground(new Color(255, 193, 7)); // Orange
                         c.setForeground(Color.BLACK);
-                    } else if (status.equals("approved")) {
+                    } else if (status.equals("APPROVED")) {
                         c.setBackground(new Color(40, 167, 69)); // Green
                         c.setForeground(Color.WHITE);
-                    } else if (status.equals("rejected")) {
+                    } else if (status.equals("REJECTED")) {
                         c.setBackground(new Color(220, 53, 69)); // Red
                         c.setForeground(Color.WHITE);
                     } else {

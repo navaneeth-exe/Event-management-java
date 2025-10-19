@@ -7,7 +7,7 @@ public class EventRegistration {
     private int eventId;
     private int participantId;
     private Date registrationDate;
-    private String status; // registered, cancelled
+    private String status; // REGISTERED, CANCELLED, ATTENDED
 
     // For display purposes (not stored in DB)
     private String eventTitle;
@@ -23,7 +23,7 @@ public class EventRegistration {
     public EventRegistration(int eventId, int participantId) {
         this.eventId = eventId;
         this.participantId = participantId;
-        this.status = "registered";
+        this.status = "REGISTERED";
         this.registrationDate = new Date();
     }
 
