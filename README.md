@@ -1,12 +1,12 @@
-🎯 Event Management System (Java + MySQL)
+**🎯 Event Management System (Java + MySQL)**
 
 A desktop-based event management system built using Java Swing and MySQL, featuring role-based access, admin approval workflows, and smart hall booking.
 
-📘 Overview
+**📘 Overview**
 
 This system helps institutions plan, approve, and manage events efficiently — from event creation to participant registration — all through a clean, intuitive desktop app.
 
-Key Highlights:
+**Key Highlights:**
 
 🎭 Three User Roles: Admin, Event Manager, Participant
 ✅ Event Approval Workflow (Admin-controlled)
@@ -14,36 +14,36 @@ Key Highlights:
 🔐 User Authentication with session management
 💡 Color-coded Status: Pending 🟠 | Approved 🟢 | Rejected 🔴
 
-⚙️ Features
-👨‍💼 Administrator
+**⚙️ Features**
+_👨‍💼 Administrator_
 Approve / Reject Events
 View Pending & All Events
 Track who approved or rejected events
 Real-time dashboard refresh
 
-🎪 Event Manager
+_🎪 Event Manager_
 Create Events (Title, Type, Description, Date, Hall)
 View own events with approval status
 View all approved events
 
-👤 Participant
+_👤 Participant_
 Browse and register for approved events
 View and cancel registrations
 Prevent duplicate registrations
 Search by title, date, hall, or type
 
-🧱 System Architecture
-Three-Tier Architecture:
+_🧱 System Architecture
+_Three-Tier Architecture:
 Presentation Layer – Java Swing UIs (Dashboards, Forms, Dialogs)
 Business Logic Layer – Managers, DAO classes, authentication
 Data Layer – MySQL database with JDBC connectivity
 
-🗄️ Database Schema (Simplified)
-Core Tables:
+**🗄️ Database Schema (Simplified)
+**Core Tables:
 User, EventManager, Admin, Participant, Hall, Event, EventRegistration
 
-💡 Relationships:
-One EventManager → Many Events
+**💡 Relationships:
+**One EventManager → Many Events
 One Event → Many EventRegistrations
 Admin approves or rejects events
 
