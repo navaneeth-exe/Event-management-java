@@ -6,7 +6,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * Event Details UI - Dialog to show event details and registered participants
@@ -17,6 +19,7 @@ public class EventDetailsUI extends JDialog implements ActionListener {
     private JTable participantsTable;
     private DefaultTableModel tableModel;
     private JLabel capacityLabel;
+    private JScrollPane tableScrollPane;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public EventDetailsUI(JFrame parent, Event event) {
@@ -128,15 +131,18 @@ public class EventDetailsUI extends JDialog implements ActionListener {
         
         participantsTable = new JTable(tableModel);
         participantsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        participantsTable.setRowHeight(25);
+        participantsTable.setRowHeight(30);  // Increased from 25 to 30 for better visibility
+        participantsTable.setFont(new Font("Arial", Font.PLAIN, 12));
         participantsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        participantsTable.setFillsViewportHeight(true);  // Ensure table fills the viewport
         
         // Hide Participant ID column
         participantsTable.getColumnModel().getColumn(0).setMinWidth(0);
         participantsTable.getColumnModel().getColumn(0).setMaxWidth(0);
         participantsTable.getColumnModel().getColumn(0).setWidth(0);
         
-        JScrollPane tableScrollPane = new JScrollPane(participantsTable);
+        tableScrollPane = new JScrollPane(participantsTable);
+        tableScrollPane.setPreferredSize(new Dimension(800, 300));  // Set explicit size
         centerPanel.add(tableScrollPane, BorderLayout.CENTER);
         
         mainPanel.add(centerPanel, BorderLayout.CENTER);
@@ -179,43 +185,123 @@ public class EventDetailsUI extends JDialog implements ActionListener {
     }
 
     private void loadParticipantsList() {
-        // Clear existing rows
-        tableModel.setRowCount(0);
         
-        // Fetch registrations for this event
-        List<EventRegistration> registrations = EventRegistrationDAO.getRegistrationsByEvent(event.getEventId());
-        
-        SimpleDateFormat regDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        
-        for (EventRegistration registration : registrations) {
-            // Only show active registrations
-            if (!"registered".equalsIgnoreCase(registration.getStatus())) {
-                continue;
+        // Create a completely new table model to avoid any caching issues
+        DefaultTableModel newModel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
+        };
+        
+        // Add columns
+        newModel.addColumn("Participant ID");
+        newModel.addColumn("Name");
+        newModel.addColumn("Email");
+        newModel.addColumn("Phone");
+        newModel.addColumn("Registered Date");
+        
+        // Fetch registrations directly from database with a simpler query
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            String query = "SELECT er.registrationId, er.participantId, er.registrationDate, er.status, " +
+                          "p.participantName, p.phoneNumber, u.email " +
+                          "FROM EventRegistration er " +
+                          "JOIN Participant p ON er.participantId = p.participantId " +
+                          "JOIN User u ON p.userId = u.userId " +
+                          "WHERE er.eventId = ? AND er.status = 'REGISTERED' " +
+                          "ORDER BY er.registrationDate ASC";
             
-            // Get participant details
-            Participant participant = ParticipantDAO.getParticipantById(registration.getParticipantId());
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, event.getEventId());
+            ResultSet rs = stmt.executeQuery();
             
-            if (participant != null) {
-                String name = participant.getParticipantName() != null ? participant.getParticipantName() : "N/A";
-                String email = participant.getEmail() != null ? participant.getEmail() : "N/A";
-                String phone = participant.getPhoneNumber() != null ? participant.getPhoneNumber() : "N/A";
-                String regDate = registration.getRegistrationDate() != null ? 
-                    regDateFormat.format(registration.getRegistrationDate()) : "N/A";
+            SimpleDateFormat regDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            int rowCount = 0;
+            
+            while (rs.next()) {
+                String name = rs.getString("participantName") != null ? rs.getString("participantName") : "N/A";
+                String email = rs.getString("email") != null ? rs.getString("email") : "N/A";
+                String phone = rs.getString("phoneNumber") != null ? rs.getString("phoneNumber") : "N/A";
+                String regDate = rs.getTimestamp("registrationDate") != null ? 
+                    regDateFormat.format(rs.getTimestamp("registrationDate")) : "N/A";
                 
-                tableModel.addRow(new Object[]{
-                    participant.getParticipantId(),
+                newModel.addRow(new Object[]{
+                    rs.getInt("participantId"),
                     name,
                     email,
                     phone,
                     regDate
                 });
+                
+                rowCount++;
             }
+            
+            DatabaseConnection.closeConnection(conn);
+            
+            // Replace the table model completely
+            participantsTable.setModel(newModel);
+            this.tableModel = newModel;
+            
+            // Set preferred column widths for better display
+            if (participantsTable.getColumnCount() > 0) {
+                // Hide Participant ID column
+                participantsTable.getColumnModel().getColumn(0).setMinWidth(0);
+                participantsTable.getColumnModel().getColumn(0).setMaxWidth(0);
+                participantsTable.getColumnModel().getColumn(0).setWidth(0);
+                participantsTable.getColumnModel().getColumn(0).setPreferredWidth(0);
+                
+                // Set widths for visible columns
+                participantsTable.getColumnModel().getColumn(1).setPreferredWidth(150); // Name
+                participantsTable.getColumnModel().getColumn(2).setPreferredWidth(200); // Email
+                participantsTable.getColumnModel().getColumn(3).setPreferredWidth(120); // Phone
+                participantsTable.getColumnModel().getColumn(4).setPreferredWidth(150); // Date
+            }
+            
+            // Refresh table header
+            if (participantsTable.getTableHeader() != null) {
+                participantsTable.getTableHeader().revalidate();
+                participantsTable.getTableHeader().repaint();
+            }
+            
+            // Force complete UI refresh - multiple approaches to ensure it works
+            SwingUtilities.invokeLater(() -> {
+                // Refresh table
+                participantsTable.revalidate();
+                participantsTable.repaint();
+                
+                // Refresh the scroll pane explicitly
+                if (tableScrollPane != null) {
+                    tableScrollPane.revalidate();
+                    tableScrollPane.repaint();
+                    tableScrollPane.getViewport().revalidate();
+                    tableScrollPane.getViewport().repaint();
+                }
+                
+                // Refresh parent containers
+                if (participantsTable.getParent() != null && participantsTable.getParent().getParent() != null) {
+                    participantsTable.getParent().getParent().revalidate();
+                    participantsTable.getParent().getParent().repaint();
+                }
+                
+                // Refresh the entire dialog
+                EventDetailsUI.this.revalidate();
+                EventDetailsUI.this.repaint();
+            });
+            
+            // Update dialog title
+            setTitle("Event Details - " + event.getEventTitle() + " (" + rowCount + " participants)");
+            
+        } catch (Exception e) {
+            System.out.println("ERROR: Failed to load participants: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Show error message to user
+            JOptionPane.showMessageDialog(this,
+                "Failed to load participant list: " + e.getMessage(),
+                "Database Error",
+                JOptionPane.ERROR_MESSAGE);
         }
-        
-        // Update dialog title with participant count
-        int participantCount = tableModel.getRowCount();
-        setTitle("Event Details - " + event.getEventTitle() + " (" + participantCount + " participants)");
     }
 
     @Override
@@ -230,29 +316,5 @@ public class EventDetailsUI extends JDialog implements ActionListener {
         } else if (e.getSource() == closeButton) {
             dispose();
         }
-    }
-
-    // Test main method
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // Create a test event
-            Event testEvent = new Event();
-            testEvent.setEventId(1);
-            testEvent.setEventTitle("Annual Tech Conference 2024");
-            testEvent.setEventDescription("A comprehensive technology conference featuring industry leaders and innovative sessions.");
-            testEvent.setEventType("Conference");
-            testEvent.setEventDate(new java.util.Date());
-            testEvent.setHallName("Grand Ballroom");
-            testEvent.setMaxParticipants(100);
-            
-            JFrame testFrame = new JFrame("Test Frame");
-            testFrame.setSize(400, 300);
-            testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            testFrame.setLocationRelativeTo(null);
-            testFrame.setVisible(true);
-            
-            EventDetailsUI dialog = new EventDetailsUI(testFrame, testEvent);
-            dialog.setVisible(true);
-        });
     }
 }
